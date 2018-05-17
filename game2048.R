@@ -53,20 +53,20 @@ move_tiles <- function(board, direction) {
   # column wise storing of the values, removing NA's and pasting them as far to the upward end as possible.
   columns <- split(rot_board, rep(1:ncol(rot_board), each = nrow(rot_board)))
   columns_new <- unname(lapply(X = columns, FUN = function(col) {
+    
     col_clean <- col[!is.na(col)] # removes all NA
-    run_lengths <- rle(col_clean) # Stores in order: each value in the sequence $values and how many times it occurs in $lengts
+    
+    # Procedure for the pairwise doubling.
+    run_lengths <- rle(col_clean) # Stores in order: each value in the column ($values) and in how many consecutive! tiles it occurs ($lengths)
     col_merged <- lapply(X = seq_along(run_lengths$values), FUN = function(index) {
-      if (run_lengths$lengths[index] == 2 ) {
-        return(val) # Two numbers are merged. Value doubles
-      } else if (e) {
-        # First two are merged. Other stays MODULO!!
-      } else if (e) {
-        # All 
-      } else {
-        
-      }
+      doubles <- rep(x = 2 * run_lengths$values[[index]], times = floor(run_lengths$lengths[[index]] / 2)) # paste the double of the value for each pair in the consecutive sequence, starting at the beginning.
+      single <- rep(x = run_lengths$values[[index]], times = run_lengths$lengths[[index]] %% 2) # take account of the possible single value that remains. This one is not doubled. Modulo two (%% 2) becomes zero if the run length is a multiple of two and there are only pairs.
+      return(c(doubles,single))
     })
-    col_full <- c(col_clean, rep(NA, length.out = length(col) - length(col_clean))) # Fill the column up with NA's till it is the right length again
+    col_merged <- do.call(what = c, col_merged) # Concatenate the list output (vectors of various lengths) into a vector
+    
+    # Fill the column up with NA's till it is the right length again
+    col_full <- c(col_merged, rep(NA, length.out = length(col) - length(col_merged))) 
   }))
   
   # Bind the columns and do the remainder of rotations for a total of 4, so the board is in original orientation again.
