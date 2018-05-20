@@ -6,22 +6,27 @@ source("./game2048.R")
 # - the board (4x4 matrix)
 # - the global score at that moment.
 # Then at each turn a direction of movement needs to be given, and a random tile is added to the field.
-start_2048 <- function() {
+play_2048 <- function() {
   
   print("Welcome to 2048, type 'end' to stop the game")
-  output <- list(board = board_t0, score = 0) # Initialization
-  input <- "up" # just an initial direction of movement so it does not crash.
+  game <- initialize_2048() # Initialization
   
-  while(input != "end") {
+  while (game$play) {
     
-    output <- move_tiles(board = output$board, direction = input, score = output$score )
-    print(paste("your score is", output$score, sep = " "))
-    print(output$board)
-    output$board <- add_tile(board = output$board)
-    print(output$board)
+    game <- add_tile(game = game)
+    print(game$board)
     input <- readline(prompt = "enter direction: ")
+    if (input != 'end') {
+      game <- move_tiles(game = game, direction = input)
+      print(game$board)
+      game <- update_game(game)
+      print(paste("turns:", game$turns ,"score:", game$score, sep = " "))
+    } else {
+      game <- update_game(game, manual_terminate = TRUE)
+    }
   }
-  stop()
+  print("The game has finished")
+  print(paste("turns:", game$turns ,"score:", game$score, sep = " "))
 }
 
-start_2048()
+play_2048()
